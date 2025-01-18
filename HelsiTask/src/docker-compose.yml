@@ -1,0 +1,8 @@
+services:
+  taskshare.api:
+    image: ${DOCKER_REGISTRY-}taskshareapi
+    build:
+      context: .
+      dockerfile: TaskShare.API/Dockerfile
+  mongo:
+    image: mongo:latest

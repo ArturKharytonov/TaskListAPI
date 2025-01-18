@@ -1,0 +1,28 @@
+services:
+  taskshare.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=crypticpassword
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ConnectionStrings__DefaultConnection=mongodb://mongo:27017
+      - MongoDb__DbName=TaskShareDatabase
+      - MongoDb__CollectionName=TaskShareCollection
+    depends_on:
+      - mongo
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${USERPROFILE}/.aspnet/https:/https/:ro
+
+  mongo:
+    ports:
+      - "27017:27017" 
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
