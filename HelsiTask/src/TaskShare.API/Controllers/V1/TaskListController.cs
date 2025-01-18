@@ -38,30 +38,19 @@ public class TaskListController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateTaskListRequest request)
     {
-        try
-        {
-            var taskList = await _validationService.ValidateUserAccessAsync(id, request.UserId);
+        var taskList = await _validationService.ValidateUserAccessAsync(id, request.UserId);
 
-            var taskListDto = new TaskListDto
-            {
-                Id = taskList.Id,
-                Name = request.Name,
-                OwnerId = taskList.OwnerId,
-                SharedWithUserIds = taskList.SharedWithUserIds,
-                CreationDate = taskList.CreationDate
-            };
+        var taskListDto = new TaskListDto
+        {
+            Id = taskList.Id,
+            Name = request.Name,
+            OwnerId = taskList.OwnerId,
+            SharedWithUserIds = taskList.SharedWithUserIds,
+            CreationDate = taskList.CreationDate
+        };
 
-            await _taskListService.UpdateTaskListAsync(id, taskListDto);
-            return Ok("Task list updated successfully");
-        }
-        catch (TaskListNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (UnauthorizedTaskListAccessException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        await _taskListService.UpdateTaskListAsync(id, taskListDto);
+        return Ok("Task list updated successfully");
     }
 
     [HttpDelete("{id}")]
@@ -82,19 +71,8 @@ public class TaskListController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetAsync(string id, [FromQuery] int userId)
     {
-        try
-        {
-            var taskList = await _validationService.ValidateUserAccessAsync(id, userId);
-            return Ok(taskList);
-        }
-        catch (TaskListNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (UnauthorizedTaskListAccessException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var taskList = await _validationService.ValidateUserAccessAsync(id, userId);
+        return Ok(taskList);
     }
 
     [HttpGet]
@@ -107,74 +85,41 @@ public class TaskListController : ControllerBase
     [HttpPost("{id}/share")]
     public async Task<IActionResult> ShareAsync(string id, [FromBody] ShareTaskListRequest request)
     {
-        try
+        var taskList = await _validationService.ValidateUserAccessAsync(id, request.UserId);
+        if (taskList.OwnerId == request.UserIdToShare ||
+            taskList.SharedWithUserIds.Contains(request.UserIdToShare))
         {
-            var taskList = await _validationService.ValidateUserAccessAsync(id, request.UserId);
-            if (taskList!.OwnerId == request.UserIdToShare ||
-                taskList.SharedWithUserIds.Contains(request.UserIdToShare))
-            {
-                return Ok("This user already has access to task list");
-            }
+            return Ok("This user already has access to task list");
+        }
 
-            var result = await _taskListService.ShareTaskListAsync(id, request.UserIdToShare);
-            if (!result) return BadRequest("Unable to share the task list");
-            return Ok("Task list shared successfully");
-        }
-        catch (TaskListNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (UnauthorizedTaskListAccessException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var result = await _taskListService.ShareTaskListAsync(id, request.UserIdToShare);
+        if (!result) return BadRequest("Unable to share the task list");
+        return Ok("Task list shared successfully");
     }
 
     [HttpGet("{id}/shared-users")]
     public async Task<IActionResult> GetSharedUsersAsync(string id, [FromQuery] int userId)
     {
-        try
+        await _validationService.ValidateUserAccessAsync(id, userId);
+        var sharedUsers = await _taskListService.GetSharedUsersAsync(id);
+        if (!sharedUsers.Any())
         {
-            await _validationService.ValidateUserAccessAsync(id, userId);
-            var sharedUsers = await _taskListService.GetSharedUsersAsync(id);
-            if (!sharedUsers.Any())
-            {
-                return NotFound("No users are currently shared with this task list");
-            }
-            return Ok(sharedUsers);
+            return NotFound("No users are currently shared with this task list");
         }
-        catch (TaskListNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (UnauthorizedTaskListAccessException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return Ok(sharedUsers);
     }
 
     [HttpPost("{id}/unshare")]
     public async Task<IActionResult> UnshareAsync(string id, [FromBody] UnshareTaskListRequest request)
     {
-        try
+        var taskList = await _validationService.ValidateUserAccessAsync(id, request.UserId);
+        if (!taskList.SharedWithUserIds.Contains(request.UserIdToUnshare))
         {
-            var taskList = await _validationService.ValidateUserAccessAsync(id, request.UserId);
-            if (!taskList!.SharedWithUserIds.Contains(request.UserIdToUnshare))
-            {
-                return Ok("There is no user with this ID");
-            }
+            return Ok("There is no user with this ID");
+        }
 
-            var result = await _taskListService.UnshareTaskListAsync(id, request.UserIdToUnshare);
-            if (!result) return NotFound("Failed to unshare the task list");
-            return Ok("Task list un-shared successfully");
-        }
-        catch (TaskListNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (UnauthorizedTaskListAccessException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var result = await _taskListService.UnshareTaskListAsync(id, request.UserIdToUnshare);
+        if (!result) return NotFound("Failed to unshare the task list");
+        return Ok("Task list un-shared successfully");
     }
 }

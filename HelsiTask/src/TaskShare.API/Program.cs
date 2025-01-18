@@ -2,6 +2,7 @@ using Asp.Versioning;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using TaskShare.API.Configuration;
+using TaskShare.API.Middleware;
 using TaskShare.Application.Extensions;
 using TaskShare.Infrastructure.Extensions;
 
@@ -37,6 +38,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddApplicationServices();
 
+builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
+
 var app = builder.Build();
 
 // Configure HTTP instead of HTTPS for development
@@ -53,8 +56,9 @@ app.UseSwaggerUI(options =>
     }
 });
 
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();

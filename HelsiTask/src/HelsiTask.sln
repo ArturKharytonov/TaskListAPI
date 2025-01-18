@@ -8,6 +8,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskShare.Application", "TaskShare.Application\TaskShare.Application.csproj", "{76E16F76-3CD6-4497-A9FF-256D675D6DBD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskShare.Infrastructure", "TaskShare.Infrastructure\TaskShare.Infrastructure.csproj", "{BE38A6BF-9095-4C1D-A885-168BB4953651}"
+	ProjectSection(ProjectDependencies) = postProject
+		{76E16F76-3CD6-4497-A9FF-256D675D6DBD} = {76E16F76-3CD6-4497-A9FF-256D675D6DBD}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskShare.Core", "TaskShare.Core\TaskShare.Core.csproj", "{8139EDFD-E13A-4264-A520-45224A016F5B}"
 EndProject

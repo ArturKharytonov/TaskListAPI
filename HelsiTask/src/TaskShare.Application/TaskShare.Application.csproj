@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TaskShare.Core\TaskShare.Core.csproj" />
-    <ProjectReference Include="..\TaskShare.Infrastructure\TaskShare.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
